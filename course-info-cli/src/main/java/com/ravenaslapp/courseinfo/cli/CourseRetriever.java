@@ -1,7 +1,9 @@
 package com.ravenaslapp.courseinfo.cli;
 
 import com.ravenaslapp.courseinfo.cli.service.CourseRetrievalService;
+import com.ravenaslapp.courseinfo.cli.service.CourseStorageService;
 import com.ravenaslapp.courseinfo.cli.service.PluralsightCourse;
+import com.ravenaslapp.courseinfo.repository.CourseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +32,14 @@ public class CourseRetriever {
         LOG.info("Retrieving courses for author '{}'", authorId);
         CourseRetrievalService courseRetrievalService = new CourseRetrievalService();
 
+        CourseRepository courseRepository = CourseRepository.openCourseRepository("./courses.db");
+        CourseStorageService courseStorageService = new CourseStorageService(courseRepository);
+
         List<PluralsightCourse> coursesToStore = courseRetrievalService.getCoursesFor(authorId)
                         .stream()
                         .filter(course -> !course.isRetired())
                         .toList();
         LOG.info("Received the following {} courses {}", coursesToStore.size(), coursesToStore);
+        courseStorageService.storePluralsightCourses(coursesToStore);
     }
 }
